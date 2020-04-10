@@ -1,28 +1,15 @@
 const express = require("express");
-  
+const MongoClient = require('mongodb').MongoClient; 
+
 const app = express();
-
-require('./app/routes')(app, {});
-
-
-
-
-
-
-app.listen(3000, () => {
-  console.log('Start server');
-});
-
-/*
-app.get("/", function(request, response){
-      
-    response.send("<h1>Главная страница</h1>");
-});
-app.use("/about", function(request, response){
-      
-    let id = request.query.id;
-    let userName = request.query.name;
-    response.send("<h1>Информация</h1><p>id=" + id +"</p><p>name=" + userName + "</p>");
-});
- 
-app.listen(3000); */
+const url = "mongodb://localhost:27017/";
+MongoClient.connect(url, (err, db) => {
+	if (err) 
+		return console.log(err);
+	  
+	require('./app/routes')(app, db);
+	
+	app.listen(3000, () => {
+		console.log('Server start');
+	});               
+}); 
