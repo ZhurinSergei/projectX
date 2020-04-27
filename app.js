@@ -1,4 +1,3 @@
-
 const http = require('http');
 const Telegraf = require('telegraf');
 const Extra = require('telegraf/extra')
@@ -12,7 +11,13 @@ let state = {};
 const addressAPI = 'http://' + process.env.URL_API + ':' + process.env.PORT;
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
-bot.start((ctx) => ctx.reply('Welcome! Send me a tracking code.'));
+bot.start((ctx) => {
+    const userId = ctx.message.from.id;
+    if(!state[userId])
+	state[userId] = {userId:userId, message:'', state:'start'};
+
+    ctx.reply('Welcome! Send me a tracking code.')
+});
 bot.help((ctx) => ctx.reply('Send me a tracking code.'));
 
 const getAllParcelsFromUser = async (userId) => {
@@ -35,62 +40,85 @@ const getInfoAllParcels = parcels => {
 
 bot.command('MyParcels', async (ctx) => {
 	const userId = ctx.message.from.id;
+	state[userId].state = 'MyParcels';
 
 	const parcels = await getAllParcelsFromUser(userId);
 	if(parcels.length == 0)
-        	return ctx.replyWithMarkdown('No parcels');
+        	return ctx.reply('No parcels');
 
 	const infoAboutParcels = getInfoAllParcels(parcels);
 	return ctx.replyWithMarkdown(infoAboutParcels);
 });
 
-bot.command('deleteParcels', ctx => {
- 
+bot.command('deleteParcel', ctx => {
+    const userId = ctx.message.from.id;
+    state[userId].state = 'deleteParcel';
 
+    ctx.reply('Send the token number you want to delete');
 });
 
 bot.on('text', ctx => {
 	const userId = ctx.message.from.id;
-	const token = ctx.message.text;
+	const text = ctx.message.text;
 
-	if (!state[userId])
-		state[userId] = { id: userId, token: token};
+	if(!state[userId])
+	    state[userId] = {userId:userId, message:text, state:'start'}
+	state[userId].message = text;
 
-	return ctx.reply('Is the token correct?',
+	switch(state[userId].state) {
+	    case 'start':
+        	return ctx.reply('Is the token correct?',
 			Extra.HTML().markup(m =>
 			m.inlineKeyboard([
-				m.callbackButton('True', 'true'),
+				m.callbackButton('True', 'new_token'),
 				m.callbackButton('False', 'false')
-			])))
+			])));
+	    case 'deleteParcel':
+                return ctx.reply('Do you want to remove the token?',
+                        Extra.HTML().markup(m =>
+                        m.inlineKeyboard([
+                                m.callbackButton('True', 'delete_token'),
+                                m.callbackButton('False', 'false')
+                        ])));
+	}
+
 });
 
-bot.on('callback_query', ctx => {
-	const isVerifyToken = ctx.update.callback_query.data;	
-	
-	if (isVerifyToken === 'false')
+bot.on('callback_query', async ctx => {
+        const userId = ctx.update.callback_query.from.id;
+	const callbackState = ctx.update.callback_query.data;
+
+	if (callbackState === 'false') {
+		state[userId].state = 'start';
 		return ctx.reply('Send me a tracking code.');
+	}
 
-	const userId = ctx.update.callback_query.from.id;
-	const token = state[userId].token;
+	const link = addressAPI + '/parcels';
 
-	const data = {
-		userId:userId,
-		token:token,
-		status:'sent'
-	};
-	
-	const answerPOST =  request(
-				process.env.URL_API,
-				process.env.PORT,
-				'/parcels',
-				'POST',
-				JSON.stringify(data),
-				response => {
-					console.log("STATUS: " + response.statusCode);
-			});
+	let response;
+	switch(callbackState) {
+	    case 'new_token':
+		response = await axios.post(link,
+					{userId:userId,
+                			token:state[userId].message,
+               				status:'sent'});
+		break;
+
+	    case 'delete_token': {
+		const parcels = await getAllParcelsFromUser(userId);
+		const idTokenFromDelete = parcels[state[userId].message - 1]._id;
+
+		response = await axios.delete(link + '/' + idTokenFromDelete);
+		break;
+	}
 
 	return ctx.replyWithMarkdown('Okay!');
 });
 
 bot.launch();
+
+
+
+
+
 
