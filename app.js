@@ -1,7 +1,10 @@
 const express = require("express");
 const MongoClient = require('mongodb').MongoClient; 
+const bodyParser = require('body-parser');
 
 const app = express();
+app.use(bodyParser.json());
+//app.use(bodyParser.urlencoded({ extended: true}));
 const url = "mongodb://localhost:27017/";
 MongoClient.connect(url, (err, client) => {
 	if (err) return console.log(err);

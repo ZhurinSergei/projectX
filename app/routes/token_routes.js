@@ -2,7 +2,7 @@ module.exports = function(app, db) {
 	app.get('/parcels', (req, res) => {
 		const status = req.query['status'];	
 		const details = status != undefined ? {status: status} : {};
-
+		console.dirxml(details);
 		db.collection('parcels').find(details).toArray((err, result) => {
 			if (err) throw err;
 			res.send(result);
@@ -10,9 +10,18 @@ module.exports = function(app, db) {
 	});
 	
 	app.post('/parcels', (req, res) => {
-		const parcel = { token: req.body.token, status: req.body.status };
-		
-		db.collection('parcels').insert(parcel, (err, result) => {
+		if(!req.body) return res.sendStatus(400);
+
+
+		console.log('req.body');
+		console.log(req.body);
+		const parcel = {userId: req.body.userId, 
+                                token: req.body.token, 
+                                status: req.body.status 
+                                };
+
+console.dirxml(parcel);
+		db.collection('parcels').insertOne(parcel, (err, result) => {
 			if (err) { 
 				res.send({ 'error': 'An error has occurred' }); 
 			} else {
