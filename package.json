@@ -5,6 +5,7 @@
   "main": "app.js",
   "dependencies": {
     "@mtproto/core": "2.0.2",
+    "axios": "^0.19.2",
     "telegraf": "^3.37.0"
   },
   "devDependencies": {

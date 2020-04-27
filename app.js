@@ -1,43 +1,53 @@
+
 const http = require('http');
 const Telegraf = require('telegraf');
 const Extra = require('telegraf/extra')
 const { Markup } = require('telegraf');
+const axios = require('axios');
 
 const { getRequest, request } = require('./app/requests/requests.js');
 
 
 let state = {};
+const addressAPI = 'http://' + process.env.URL_API + ':' + process.env.PORT;
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 bot.start((ctx) => ctx.reply('Welcome! Send me a tracking code.'));
 bot.help((ctx) => ctx.reply('Send me a tracking code.'));
 
-bot.command('MyParcels', ctx => {
+const getAllParcelsFromUser = async (userId) => {
+    const link = addressAPI + '/parcels';
+    const response = await axios.get(link);
+
+    let parcels = response.data;
+    parcels = parcels.filter(x => x.userId === userId);
+
+    return parcels;
+}
+
+const getInfoAllParcels = parcels => {
+    let info = 'My parcels:\n';
+    parcels.map((currentValue, index) =>
+	info += (index + 1) + ') Token: ' + currentValue['token'] + ', Status:' + currentValue['status'] + '\n');
+
+    return info;
+}
+
+bot.command('MyParcels', async (ctx) => {
 	const userId = ctx.message.from.id;
-	if (!state[userId])
-		state[userId] = { id: userId };
 
-	const answerGet = getRequest(
-		process.env.URL_API,
-		process.env.PORT,
-		'/parcels',
-		response => {
-			let data = '';
-			response.on('data', chunk => data += chunk);
-			response.on('end', () => {
-				let answer = 'My parcels:\n';
-				data = JSON.parse(data);
+	const parcels = await getAllParcelsFromUser(userId);
+	if(parcels.length == 0)
+        	return ctx.replyWithMarkdown('No parcels');
 
-				if(data.length == 0)
-					return ctx.replyWithMarkdown('Empty');
-
-				data.map(x => answer += 'Token: ' + x['token'] + ', Status:' + x['status'] + '\n');
-				
-				return ctx.replyWithMarkdown(answer);
-			});
-		});
+	const infoAboutParcels = getInfoAllParcels(parcels);
+	return ctx.replyWithMarkdown(infoAboutParcels);
 });
 
+bot.command('deleteParcels', ctx => {
+ 
+
+});
 
 bot.on('text', ctx => {
 	const userId = ctx.message.from.id;
