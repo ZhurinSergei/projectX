@@ -1,5 +1,5 @@
-function GET(url, port, path, callback) {
-	const https = require('https')
+function getRequest(url, port, path, callback) {
+	const https = require('http');
 	const options = {
 		hostname: url,
 		port: port,
@@ -14,11 +14,11 @@ function GET(url, port, path, callback) {
 	})
 
 	req.end();
-	return req;;
+return req;
 }
 
 function request(url, port, path, method, data, callback) {
-	const https = require('https')
+	const https = require('http');
 
 	const options = {
 		hostname: url,
@@ -31,16 +31,19 @@ function request(url, port, path, method, data, callback) {
 		}
 	}
 
+//console.dirxml(options);
+	
 	const req = https.request(options, callback);
 
 	req.on('error', error => {
-		console.error(error);
+		console.error('error ' + error);
 	})
 
+console.dirxml(data);
 	req.write(data);
 	req.end();
-	
+
 	return req;
 }
 
-export {GET, request}; 
+module.exports = {getRequest, request};
