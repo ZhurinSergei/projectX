@@ -14,7 +14,8 @@ function getRequest(url, port, path, callback) {
 	})
 
 	req.end();
-return req;
+	
+	return req;
 }
 
 function request(url, port, path, method, data, callback) {
@@ -30,8 +31,6 @@ function request(url, port, path, method, data, callback) {
 			'Content-Length': data.length
 		}
 	}
-
-//console.dirxml(options);
 	
 	const req = https.request(options, callback);
 
@@ -39,7 +38,6 @@ function request(url, port, path, method, data, callback) {
 		console.error('error ' + error);
 	})
 
-console.dirxml(data);
 	req.write(data);
 	req.end();
 
