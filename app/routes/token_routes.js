@@ -1,3 +1,5 @@
+var ObjectID = require('mongodb').ObjectID;
+
 module.exports = function(app, db) {
 	app.get('/parcels', (req, res) => {
 		const status = req.query['status'];	
@@ -31,11 +33,11 @@ module.exports = function(app, db) {
 		const id = req.params.id;
 		const details = { '_id': new ObjectID(id) };
 		
-		db.collection('parcels').remove(details, (err, item) => {
+		db.collection('parcels').deleteOne(details, (err, item) => {
 			if (err) {
 				res.send({'error':'An error has occurred'});
 			} else {
-				res.send('Note ' + id + ' deleted!');
+				res.send(id + ':deleted!');
 			} 
 		});
 	});
