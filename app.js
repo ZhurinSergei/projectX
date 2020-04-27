@@ -104,7 +104,7 @@ bot.on('callback_query', async ctx => {
                				status:'sent'});
 		break;
 
-	    case 'delete_token': {
+	    case 'delete_token':
 		const parcels = await getAllParcelsFromUser(userId);
 		const idTokenFromDelete = parcels[state[userId].message - 1]._id;
 
