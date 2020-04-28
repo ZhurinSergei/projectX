@@ -45,9 +45,13 @@ module.exports = function(app, db) {
 	app.put ('/parcels/:id', (req, res) => {
 		const id = req.params.id;
 		const details = { '_id': new ObjectID(id) };
-		const parcel = { text: req.body.body, title: req.body.title };
+		const parcel = {
+			userId: req.body.userId, 
+			token: req.body.token, 
+			status: req.body.status 
+			};
 		
-		db.collection('parcels').update(details, parcel, (err, result) => {
+		db.collection('parcels').updateOne(details, parcel, (err, result) => {
 			if (err) {
 				res.send({'error':'An error has occurred'});
 			} else {
