@@ -1,0 +1,27 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "dev": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZhurinSergei/api.git"
+  },
+  "author": "zhurin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ZhurinSergei/api/issues"
+  },
+  "homepage": "https://github.com/ZhurinSergei/api#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongodb": "^3.5.5"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.3"
+  }
+}
