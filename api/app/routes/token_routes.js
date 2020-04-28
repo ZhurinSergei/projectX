@@ -50,11 +50,15 @@ module.exports = function(app, db) {
 			token: req.body.token, 
 			status: req.body.status 
 			};
-		
-		db.collection('parcels').updateOne(details, parcel, (err, result) => {
+
+		db.collection('parcels').updateOne(details,
+			{$set: parcel},
+			(err, result) => {
 			if (err) {
+				console.log(err);
 				res.send({'error':'An error has occurred'});
 			} else {
+				console.log(parcel);
 				res.send(parcel);
 			} 
 		});
